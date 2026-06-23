@@ -1,107 +1,385 @@
-💳 Credit Card Fraud Detection
-Machine learning project to detect fraudulent credit card transactions. Built with Logistic Regression, Random Forest, and XGBoost. Includes SMOTE for imbalanced data, threshold tuning, SHAP explainability, ROC-AUC evaluation, and model deployment using FastAPI. Dataset: Kaggle Credit Card Fraud Detection.
+# CRAG + Self-RAG PDF Question Answering System
 
-📌 Problem Statement
-Credit card fraud is a major financial threat. In real-world datasets, fraudulent transactions make up less than 1% of all transactions — making this a classic imbalanced classification problem.
-The goal is to build a model that can accurately detect fraud without simply predicting "not fraud" for everything.
+An advanced Retrieval-Augmented Generation (RAG) application that combines **CRAG (Corrective RAG)** and **Self-RAG** techniques to improve retrieval quality, answer grounding, and response reliability.
 
-📂 Dataset
+The system allows users to upload PDF documents, ask questions, and receive answers generated through a multi-stage retrieval and verification pipeline. It also includes a **Plain RAG baseline** and an **LLM-based comparison module** to evaluate whether CRAG + Self-RAG produces better results.
 
-Source: Kaggle — Credit Card Fraud Detection
-284,807 transactions
-492 frauds (0.17%)
-Features: Time, Amount, and V1–V28 (PCA-transformed anonymized features)
-Target: Class → 0 = Normal, 1 = Fraud
+---
 
+## Features
 
-🧠 Project Workflow
-Raw Data
-   ↓
-Exploratory Data Analysis (EDA)
-   ↓
-Data Cleaning (duplicates, nulls)
-   ↓
-Feature Scaling (StandardScaler)
-   ↓
-Train-Test Split (stratified)
-   ↓
-SMOTE (handle imbalanced data)
-   ↓
-Model Training (LR, RF, XGBoost)
-   ↓
-Threshold Tuning
-   ↓
-Evaluation (Precision, Recall, F1, ROC-AUC)
-   ↓
-SHAP Explainability
-   ↓
-Model Saved (joblib)
+### Document Intelligence
 
-⚙️ Tech Stack
-CategoryToolsLanguagePython 3DataPandas, NumPyVisualizationMatplotlibML ModelsScikit-learn, XGBoostImbalance Handlingimbalanced-learn (SMOTE)ExplainabilitySHAPModel SavingJoblibEnvironmentGoogle Colab
+* Upload and query multiple PDF documents
+* Automatic document chunking and embedding
+* FAISS vector database for semantic retrieval
+* OpenAI embeddings for similarity search
 
-🤖 Models Used
-ModelImbalance HandlingLogistic RegressionSMOTERandom ForestSMOTEXGBoostscale_pos_weight
-All three models are compared using the same evaluation framework at multiple thresholds (0.3, 0.5, 0.7, 0.9).
+### CRAG (Corrective RAG)
 
-📊 Evaluation Metrics
-Accuracy is not used as the primary metric — a model predicting "not fraud" always would achieve 99%+ accuracy but be completely useless.
-Instead the project uses:
+* Retrieval quality evaluation
+* Document relevance scoring
+* Retrieval verdict classification:
 
-Precision — of all predicted frauds, how many were actually fraud
-Recall — of all actual frauds, how many did the model catch
-F1-Score — balance between precision and recall
-ROC-AUC — overall model discrimination ability
-Confusion Matrix — visual breakdown of predictions
+  * CORRECT
+  * AMBIGUOUS
+  * INCORRECT
+* Automatic web search fallback using Tavily
+* Query rewriting for better web retrieval
+* Context refinement through sentence-level filtering
 
+### Self-RAG
 
-🎯 Threshold Tuning
-Instead of using the default 0.5 probability threshold, the project tests multiple thresholds:
+* Retrieval decision gate
+* Grounding verification (IsSUP)
+* Answer usefulness evaluation (IsUSE)
+* Automatic answer revision loop
+* Recursive answer correction workflow
 
-Lower threshold (0.3) → catches more frauds, more false alarms
-Higher threshold (0.7) → fewer false alarms, may miss some frauds
+### Evaluation & Benchmarking
 
-The best threshold is selected based on the F1-score for the fraud class.
+* Traditional RAG baseline implementation
+* Side-by-side comparison against CRAG + Self-RAG
+* LLM-based answer evaluator
+* Comparison based on:
 
-🔍 SHAP Explainability
-SHAP (SHapley Additive exPlanations) is used on the XGBoost model to answer:
+  * Accuracy
+  * Groundedness
+  * Completeness
+  * Answer quality
 
-"Why did the model flag this transaction as fraud?"
+### User Interface
 
-Two SHAP plots are included:
+* Streamlit-based interface
+* PDF upload support
+* Question history sidebar
+* Pipeline diagnostics
+* Interactive comparison mode
 
-Summary plot — which features matter most overall
-Force plot — explanation for a single transaction
+---
 
+# Architecture
 
-📁 Project Structure
-credit-card-fraud-detection/
-│
-├── Credit_card_fraud_detection.ipynb   # Main notebook
-├── fraud_model.pkl                     # Saved XGBoost model
-├── scaler_amount.pkl                   # Scaler for Amount feature
-├── scaler_time.pkl                     # Scaler for Time feature
+## Main Pipeline (CRAG + Self-RAG)
+
+```text
+User Question
+      │
+      ▼
+Decide Retrieval Needed?
+      │
+ ┌────┴────┐
+ │         │
+ ▼         ▼
+Direct    Retrieve
+Answer    Documents
+              │
+              ▼
+      Evaluate Documents
+              │
+              ▼
+     CORRECT / AMBIGUOUS /
+         INCORRECT
+              │
+              ▼
+      Rewrite Query
+              │
+              ▼
+         Web Search
+              │
+              ▼
+      Knowledge Refinement
+              │
+              ▼
+       Generate Answer
+              │
+              ▼
+     IsSUP Verification
+              │
+     Supported Answer?
+              │
+      ┌───────┴───────┐
+      │               │
+      ▼               ▼
+ Accept         Revise Answer
+      │               │
+      └───────┬───────┘
+              ▼
+       IsUSE Check
+              │
+              ▼
+       Final Answer
+```
+
+## Plain RAG Baseline
+
+```text
+User Question
+      │
+      ▼
+Retrieve Documents
+      │
+      ▼
+Generate Answer
+      │
+      ▼
+Plain RAG Output
+```
+
+## Answer Comparison Pipeline
+
+```text
+CRAG + Self-RAG Answer
+            │
+            ▼
+      Comparison
+        Evaluator
+            ▲
+            │
+    Plain RAG Answer
+            │
+            ▼
+ Better Answer Selected
+```
+
+---
+
+# Tech Stack
+
+* LangGraph
+* LangChain
+* OpenAI GPT-4o Mini
+* OpenAI Embeddings
+* FAISS
+* Tavily Search API
+* Streamlit
+* PyPDF
+* Pydantic
+* Python Dotenv
+
+---
+
+# Installation
+
+## Clone Repository
+
+```bash
+git clone https://github.com/yourusername/crag-self-rag.git
+cd crag-self-rag
+```
+
+## Install Dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+## Environment Variables
+
+Create a `.env` file:
+
+```env
+OPENAI_API_KEY=your_openai_api_key
+TAVILY_API_KEY=your_tavily_api_key
+```
+
+---
+
+# Running the Application
+
+```bash
+streamlit run app.py
+```
+
+Open the local Streamlit URL displayed in the terminal.
+
+---
+
+# How It Works
+
+## Step 1: PDF Processing
+
+Uploaded PDFs are:
+
+1. Loaded using PyPDFLoader
+2. Split into chunks
+3. Embedded using OpenAI Embeddings
+4. Stored in a FAISS vector database
+
+---
+
+## Step 2: Self-RAG Retrieval Decision
+
+Before retrieving documents, the system determines whether external knowledge is required.
+
+Possible outcomes:
+
+* Retrieval Required → Continue to CRAG pipeline
+* Retrieval Not Required → Generate answer directly
+
+---
+
+## Step 3: CRAG Retrieval Evaluation
+
+Retrieved chunks are scored individually.
+
+### CORRECT
+
+At least one document is highly relevant.
+
+### AMBIGUOUS
+
+Some relevant information exists but confidence is limited.
+
+### INCORRECT
+
+Retrieved documents are not useful.
+
+---
+
+## Step 4: Web Search Fallback
+
+For ambiguous or incorrect retrieval:
+
+* Query is rewritten
+* Tavily web search is executed
+* Web results are converted into documents
+* Retrieved knowledge is merged with existing context
+
+---
+
+## Step 5: Knowledge Refinement
+
+Documents are:
+
+* Decomposed into sentences
+* Evaluated individually
+* Irrelevant sentences removed
+* Useful context preserved
+
+This creates a cleaner context for generation.
+
+---
+
+## Step 6: Answer Generation
+
+The LLM generates an answer using only the refined context.
+
+If sufficient information is unavailable, the model returns:
+
+```text
+I don't know.
+```
+
+---
+
+## Step 7: Self-RAG Verification
+
+### IsSUP (Support Check)
+
+Evaluates whether the answer is grounded in the retrieved context.
+
+Possible outcomes:
+
+* fully_supported
+* partially_supported
+* no_support
+
+If support is insufficient, the answer is revised.
+
+---
+
+### IsUSE (Usefulness Check)
+
+Evaluates whether the answer actually satisfies the user's question.
+
+Possible outcomes:
+
+* useful
+* not_useful
+
+If not useful, the system can restart the correction cycle.
+
+---
+
+## Step 8: Plain RAG Benchmark
+
+A traditional RAG pipeline runs independently:
+
+```text
+Retrieve → Generate
+```
+
+No:
+
+* Retrieval grading
+* Web search
+* Grounding checks
+* Usefulness checks
+
+This serves as a baseline for evaluation.
+
+---
+
+## Step 9: Answer Comparison
+
+The system compares:
+
+* Plain RAG Answer
+* CRAG + Self-RAG Answer
+
+An evaluator model judges which answer performs better based on:
+
+* Accuracy
+* Grounding
+* Completeness
+* Relevance
+
+---
+
+# Project Structure
+
+```text
+.
+├── app.py
+├── backend.py
+├── requirements.txt
+├── documents/
+│   ├── book1.pdf
+│   ├── book2.pdf
+│   └── book3.pdf
+├── .env
 └── README.md
+```
 
-🚀 How to Run
+---
 
-Clone the repository
+# Future Improvements
 
-bashgit clone https://github.com/yourusername/credit-card-fraud-detection.git
+* Hybrid Search (BM25 + Vector Search)
+* Source Citations
+* Streaming Responses
+* Multi-modal Document Support
+* Evaluation Dashboard
+* LangSmith Monitoring
+* Multi-user Deployment
+* PostgreSQL Vector Storage
 
-Download the dataset from Kaggle and place creditcard.csv.zip in the project folder
-Open the notebook in Google Colab or Jupyter and run all cells top to bottom
+---
 
+# Why This Project?
 
-📌 Key Learnings
+Traditional RAG systems often fail when retrieval quality is poor. This project addresses those limitations by combining:
 
-How to handle severely imbalanced datasets using SMOTE
-Why accuracy is a misleading metric for fraud detection
-How to compare multiple models using a structured evaluation table
-How to tune prediction thresholds for better recall
-How to explain model predictions using SHAP
+* CRAG for retrieval correction
+* Self-RAG for answer verification
+* Web fallback for missing knowledge
+* Benchmarking against standard RAG
 
+The result is a more reliable and self-correcting question-answering system.
 
-🙋 Author
-Made with ❤️ as a end-to-end ML project covering data preprocessing, model building, evaluation, and explainability.
-## all file are not uploaded only web site file is there
+---
+
+# License
+
+MIT License
