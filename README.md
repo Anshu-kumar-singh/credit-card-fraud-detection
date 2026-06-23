@@ -1,385 +1,204 @@
-# CRAG + Self-RAG PDF Question Answering System
+# 💳 Credit Card Fraud Detection
 
-An advanced Retrieval-Augmented Generation (RAG) application that combines **CRAG (Corrective RAG)** and **Self-RAG** techniques to improve retrieval quality, answer grounding, and response reliability.
+A machine learning project that detects fraudulent credit card transactions using a trained classification model. The project includes:
 
-The system allows users to upload PDF documents, ask questions, and receive answers generated through a multi-stage retrieval and verification pipeline. It also includes a **Plain RAG baseline** and an **LLM-based comparison module** to evaluate whether CRAG + Self-RAG produces better results.
-
----
-
-## Features
-
-### Document Intelligence
-
-* Upload and query multiple PDF documents
-* Automatic document chunking and embedding
-* FAISS vector database for semantic retrieval
-* OpenAI embeddings for similarity search
-
-### CRAG (Corrective RAG)
-
-* Retrieval quality evaluation
-* Document relevance scoring
-* Retrieval verdict classification:
-
-  * CORRECT
-  * AMBIGUOUS
-  * INCORRECT
-* Automatic web search fallback using Tavily
-* Query rewriting for better web retrieval
-* Context refinement through sentence-level filtering
-
-### Self-RAG
-
-* Retrieval decision gate
-* Grounding verification (IsSUP)
-* Answer usefulness evaluation (IsUSE)
-* Automatic answer revision loop
-* Recursive answer correction workflow
-
-### Evaluation & Benchmarking
-
-* Traditional RAG baseline implementation
-* Side-by-side comparison against CRAG + Self-RAG
-* LLM-based answer evaluator
-* Comparison based on:
-
-  * Accuracy
-  * Groundedness
-  * Completeness
-  * Answer quality
-
-### User Interface
-
-* Streamlit-based interface
-* PDF upload support
-* Question history sidebar
-* Pipeline diagnostics
-* Interactive comparison mode
+* 📊 Data analysis and model development in Jupyter Notebook
+* 🌐 Interactive Streamlit web application
+* ⚡ FastAPI prediction API
+* 🤖 Fraud probability prediction for credit card transactions
 
 ---
 
-# Architecture
+## 📌 Project Overview
 
-## Main Pipeline (CRAG + Self-RAG)
+Credit card fraud detection is a highly imbalanced classification problem where fraudulent transactions represent a very small percentage of total transactions.
 
-```text
-User Question
-      │
-      ▼
-Decide Retrieval Needed?
-      │
- ┌────┴────┐
- │         │
- ▼         ▼
-Direct    Retrieve
-Answer    Documents
-              │
-              ▼
-      Evaluate Documents
-              │
-              ▼
-     CORRECT / AMBIGUOUS /
-         INCORRECT
-              │
-              ▼
-      Rewrite Query
-              │
-              ▼
-         Web Search
-              │
-              ▼
-      Knowledge Refinement
-              │
-              ▼
-       Generate Answer
-              │
-              ▼
-     IsSUP Verification
-              │
-     Supported Answer?
-              │
-      ┌───────┴───────┐
-      │               │
-      ▼               ▼
- Accept         Revise Answer
-      │               │
-      └───────┬───────┘
-              ▼
-       IsUSE Check
-              │
-              ▼
-       Final Answer
-```
+This project demonstrates:
 
-## Plain RAG Baseline
+* Data exploration and preprocessing
+* Fraud detection model training
+* Prediction through a web interface
+* Prediction through a REST API
+
+---
+
+## 📂 Repository Structure
 
 ```text
-User Question
-      │
-      ▼
-Retrieve Documents
-      │
-      ▼
-Generate Answer
-      │
-      ▼
-Plain RAG Output
-```
-
-## Answer Comparison Pipeline
-
-```text
-CRAG + Self-RAG Answer
-            │
-            ▼
-      Comparison
-        Evaluator
-            ▲
-            │
-    Plain RAG Answer
-            │
-            ▼
- Better Answer Selected
+credit-card-fraud-detection/
+│
+├── Credit_card_fraud__detection.ipynb   # Model development notebook
+├── streamlit_app.py                     # Streamlit web application
+├── app.py                               # FastAPI backend API
+├── README.md                            # Project documentation
+└── .gitignore
 ```
 
 ---
 
-# Tech Stack
+## 🛠 Technologies Used
 
-* LangGraph
-* LangChain
-* OpenAI GPT-4o Mini
-* OpenAI Embeddings
-* FAISS
-* Tavily Search API
-* Streamlit
-* PyPDF
-* Pydantic
-* Python Dotenv
+| Category            | Tools         |
+| ------------------- | ------------- |
+| Language            | Python        |
+| Data Analysis       | Pandas, NumPy |
+| Machine Learning    | Scikit-learn  |
+| Web App             | Streamlit     |
+| API                 | FastAPI       |
+| Model Serialization | Joblib        |
 
 ---
 
-# Installation
+## 🚀 Streamlit Web Application
 
-## Clone Repository
+The Streamlit application allows users to test transactions through a simple user interface.
+
+### Features
+
+* Input all transaction features (V1–V28, Amount, Time)
+* Load sample fraud transaction
+* Load sample normal transaction
+* Predict transaction status
+* Display fraud probability
+
+### Run Locally
 
 ```bash
-git clone https://github.com/yourusername/crag-self-rag.git
-cd crag-self-rag
+pip install streamlit joblib numpy
+streamlit run streamlit_app.py
 ```
 
-## Install Dependencies
+---
+
+## ⚡ FastAPI Prediction API
+
+The project also includes a REST API for integration with external applications.
+
+### Run API
 
 ```bash
+pip install fastapi uvicorn joblib numpy pydantic
+
+uvicorn app:app --reload
+```
+
+### API Endpoint
+
+#### Home
+
+```http
+GET /
+```
+
+Response:
+
+```json
+{
+  "message": "Fraud Detection API is running"
+}
+```
+
+#### Prediction
+
+```http
+POST /predict
+```
+
+Example Request:
+
+```json
+{
+  "V1": 0.1,
+  "V2": 0.2,
+  "V3": 0.3,
+  "V4": 0.4,
+  "V5": 0.5,
+  "V6": 0.6,
+  "V7": 0.7,
+  "V8": 0.8,
+  "V9": 0.9,
+  "V10": 1.0,
+  "V11": 1.1,
+  "V12": 1.2,
+  "V13": 1.3,
+  "V14": 1.4,
+  "V15": 1.5,
+  "V16": 1.6,
+  "V17": 1.7,
+  "V18": 1.8,
+  "V19": 1.9,
+  "V20": 2.0,
+  "V21": 2.1,
+  "V22": 2.2,
+  "V23": 2.3,
+  "V24": 2.4,
+  "V25": 2.5,
+  "V26": 2.6,
+  "V27": 2.7,
+  "V28": 2.8,
+  "Amount": 100,
+  "Time": 50000
+}
+```
+
+Example Response:
+
+```json
+{
+  "prediction": 0,
+  "label": "NOT FRAUD",
+  "fraud_probability": 0.0234
+}
+```
+
+---
+
+## 📊 Notebook
+
+The notebook contains:
+
+* Dataset loading
+* Exploratory Data Analysis (EDA)
+* Fraud vs Normal transaction analysis
+* Data preprocessing
+* Model training
+* Model evaluation
+
+---
+
+## ⚠ Important Note
+
+This repository currently contains only the application code and notebook.
+
+The following files are not included and must be added separately before running predictions:
+
+```text
+fraud_model.pkl
+scaler.pkl
+```
+
+If you trained the model locally, place these files in the project root directory.
+
+---
+
+## ▶ Installation
+
+```bash
+git clone <repository-url>
+
+cd credit-card-fraud-detection
+
 pip install -r requirements.txt
 ```
 
-## Environment Variables
-
-Create a `.env` file:
-
-```env
-OPENAI_API_KEY=your_openai_api_key
-TAVILY_API_KEY=your_tavily_api_key
-```
-
----
-
-# Running the Application
+Or install manually:
 
 ```bash
-streamlit run app.py
-```
-
-Open the local Streamlit URL displayed in the terminal.
-
----
-
-# How It Works
-
-## Step 1: PDF Processing
-
-Uploaded PDFs are:
-
-1. Loaded using PyPDFLoader
-2. Split into chunks
-3. Embedded using OpenAI Embeddings
-4. Stored in a FAISS vector database
-
----
-
-## Step 2: Self-RAG Retrieval Decision
-
-Before retrieving documents, the system determines whether external knowledge is required.
-
-Possible outcomes:
-
-* Retrieval Required → Continue to CRAG pipeline
-* Retrieval Not Required → Generate answer directly
-
----
-
-## Step 3: CRAG Retrieval Evaluation
-
-Retrieved chunks are scored individually.
-
-### CORRECT
-
-At least one document is highly relevant.
-
-### AMBIGUOUS
-
-Some relevant information exists but confidence is limited.
-
-### INCORRECT
-
-Retrieved documents are not useful.
-
----
-
-## Step 4: Web Search Fallback
-
-For ambiguous or incorrect retrieval:
-
-* Query is rewritten
-* Tavily web search is executed
-* Web results are converted into documents
-* Retrieved knowledge is merged with existing context
-
----
-
-## Step 5: Knowledge Refinement
-
-Documents are:
-
-* Decomposed into sentences
-* Evaluated individually
-* Irrelevant sentences removed
-* Useful context preserved
-
-This creates a cleaner context for generation.
-
----
-
-## Step 6: Answer Generation
-
-The LLM generates an answer using only the refined context.
-
-If sufficient information is unavailable, the model returns:
-
-```text
-I don't know.
+pip install pandas numpy scikit-learn streamlit fastapi uvicorn joblib pydantic
 ```
 
 ---
 
-## Step 7: Self-RAG Verification
+## 👨‍💻 Author
 
-### IsSUP (Support Check)
-
-Evaluates whether the answer is grounded in the retrieved context.
-
-Possible outcomes:
-
-* fully_supported
-* partially_supported
-* no_support
-
-If support is insufficient, the answer is revised.
-
----
-
-### IsUSE (Usefulness Check)
-
-Evaluates whether the answer actually satisfies the user's question.
-
-Possible outcomes:
-
-* useful
-* not_useful
-
-If not useful, the system can restart the correction cycle.
-
----
-
-## Step 8: Plain RAG Benchmark
-
-A traditional RAG pipeline runs independently:
-
-```text
-Retrieve → Generate
-```
-
-No:
-
-* Retrieval grading
-* Web search
-* Grounding checks
-* Usefulness checks
-
-This serves as a baseline for evaluation.
-
----
-
-## Step 9: Answer Comparison
-
-The system compares:
-
-* Plain RAG Answer
-* CRAG + Self-RAG Answer
-
-An evaluator model judges which answer performs better based on:
-
-* Accuracy
-* Grounding
-* Completeness
-* Relevance
-
----
-
-# Project Structure
-
-```text
-.
-├── app.py
-├── backend.py
-├── requirements.txt
-├── documents/
-│   ├── book1.pdf
-│   ├── book2.pdf
-│   └── book3.pdf
-├── .env
-└── README.md
-```
-
----
-
-# Future Improvements
-
-* Hybrid Search (BM25 + Vector Search)
-* Source Citations
-* Streaming Responses
-* Multi-modal Document Support
-* Evaluation Dashboard
-* LangSmith Monitoring
-* Multi-user Deployment
-* PostgreSQL Vector Storage
-
----
-
-# Why This Project?
-
-Traditional RAG systems often fail when retrieval quality is poor. This project addresses those limitations by combining:
-
-* CRAG for retrieval correction
-* Self-RAG for answer verification
-* Web fallback for missing knowledge
-* Benchmarking against standard RAG
-
-The result is a more reliable and self-correcting question-answering system.
-
----
-
-# License
-
-MIT License
+Developed as a machine learning project for credit card fraud detection using Python, Scikit-learn, Streamlit, and FastAPI.
